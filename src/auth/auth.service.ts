@@ -9,12 +9,17 @@ import { Seller, SellerDocument } from 'src/schema/seller.schema';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
 import { UpdateSellerDto } from 'src/dto/update-seller.dto';
+import { ConfigService } from '@nestjs/config';
+import { EmailService } from './auth-email.service';
 @Injectable()
 export class AuthService {
   constructor(
+    private configService: ConfigService,
+    private jwtService: JwtService,
+    private emailService: EmailService,
     @InjectModel(Buyer.name) private buyerModel: Model<BuyerDocument>,
     @InjectModel(Seller.name) private sellerModel: Model<SellerDocument>,
-    private jwtService: JwtService,
+    
   ) {}
 
   //********** REGISTER BUYER *****************
@@ -242,7 +247,7 @@ async validateUser(
 
   //********** UPDATE SELLER *****************
   async updateSeller(userId: string, updateSellerDto: UpdateSellerDto): Promise<Seller> {
-    console.log("UserId: " + userId);
+    
     
     const updatedSeller = await this.sellerModel.findByIdAndUpdate(userId, updateSellerDto, { new: true });
 
@@ -252,4 +257,42 @@ async validateUser(
 
     return updatedSeller;
   }
+
+   //********** PASSWORD REST-TOKEN *****************
+    
+   async generatePasswordResetToken(email: string, userType: 'buyer' | 'seller') {
+    const user =
+      userType === 'buyer'
+        ? await this.buyerModel.findOne({ email })
+        : await this.sellerModel.findOne({ email });
+
+    if (!user) {
+      throw new HttpException('No user found with this email.', HttpStatus.BAD_REQUEST);
+    }
+
+    const payload = { userId: user._id };
+    const token = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_SECRET_KEY'),
+      expiresIn: '15m',
+    });
+
+    await this.emailService.sendPasswordResetEmail(email, token);
+
+    return token;
+  }
+
+  //********** RESET PASSWORD *****************
+  async resetPassword(userId: string, newPassword: string) {
+    console.log("userId: ",userId);
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await this.buyerModel.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true })
+      || await this.sellerModel.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true });
+
+    if (!updatedUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+  }
 }
+
+

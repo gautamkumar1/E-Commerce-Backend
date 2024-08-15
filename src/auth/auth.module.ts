@@ -11,6 +11,7 @@ import { Seller, SellerSchema } from 'src/schema/seller.schema';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseLoggerService } from './database-logger.service';
+import { EmailService } from './auth-email.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DatabaseLoggerService } from './database-logger.service';
       inject: [ConfigService],
     }),
     PassportModule,
+    EmailService,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

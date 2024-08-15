@@ -5,7 +5,6 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
 import { UpdateSellerDto } from 'src/dto/update-seller.dto';
 
-
 @Controller('api')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -44,8 +43,19 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Put('update/seller')
   async updateSeller(@Request() req, @Body() updateSellerDto: UpdateSellerDto) {
-    console.log("req.user.sub: "+req.user);
-    
     return this.authService.updateSeller(req.user.userId, updateSellerDto);
+  }
+
+  @Post('password-reset/request')
+  async requestPasswordReset(@Body('email') email: string, @Body('userType') userType: 'buyer' | 'seller') {
+    return this.authService.generatePasswordResetToken(email, userType);
+  }
+
+  @Post('password-reset/confirm')
+  async resetPassword(
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string
+  ) {
+    return this.authService.resetPassword(token, newPassword);
   }
 }
