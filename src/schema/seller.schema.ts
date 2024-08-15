@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { UserRole } from 'src/auth/role.enum';
 
 export type SellerDocument = Seller & Document;
 
@@ -23,6 +24,9 @@ export class Seller {
 
   @Prop({ required: true, minlength: 3 })
   shopname: string;
+
+  @Prop({ type: [String], enum: UserRole, default: [UserRole.Seller] })
+ roles: UserRole[];
 }
 
 export const SellerSchema = SchemaFactory.createForClass(Seller);

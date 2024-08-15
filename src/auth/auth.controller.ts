@@ -4,7 +4,9 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
 import { UpdateSellerDto } from 'src/dto/update-seller.dto';
-
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/auth/role.enum';
+import { RolesGuard } from 'src/auth/roles.guard';
 @Controller('api')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -28,8 +30,9 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard,RolesGuard)
   @Post('profile')
+  @Roles(UserRole.Seller)
   getProfile(@Request() req) {
     return req.user;
   }

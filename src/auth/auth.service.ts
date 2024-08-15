@@ -11,6 +11,7 @@ import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
 import { UpdateSellerDto } from 'src/dto/update-seller.dto';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from './auth-email.service';
+import { UserRole } from './role.enum';
 @Injectable()
 export class AuthService {
   constructor(
@@ -157,9 +158,14 @@ export class AuthService {
   
     // Hash the password
     const hashedPassword = await bcrypt.hash(createSellerDto.password, 10);
-  
+  // Set the roles (default to ['seller'] if no roles provided)
+  const roles = createSellerDto.roles && createSellerDto.roles.length > 0
+  ? createSellerDto.roles
+  : [UserRole.Seller];
+
+
     // Create a new seller with the hashed password
-    const createdSeller = new this.sellerModel({ ...createSellerDto, password: hashedPassword });
+    const createdSeller = new this.sellerModel({ ...createSellerDto, password: hashedPassword },roles);
   
     // Save the new seller to the database and return it
     return createdSeller.save();
@@ -229,7 +235,7 @@ async validateUser(
 
   //********** Login  *****************
   async login(user: any) {
-    const payload = { username: user.username, userId: user._id,email:user.email,phone:user.phone,address:user.address};
+    const payload = { username: user.username, userId: user._id,email:user.email,phone:user.phone,address:user.address,roles:user.roles};
     return {
       token: this.jwtService.sign(payload),
     };
@@ -299,5 +305,3 @@ async validateUser(
     }
   }
 }
-
-
