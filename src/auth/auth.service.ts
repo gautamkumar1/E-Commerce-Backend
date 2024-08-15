@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { Buyer, BuyerDocument } from 'src/schema/buyer.schema';
 import { Seller, SellerDocument } from 'src/schema/seller.schema';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
+import { UpdateSellerDto } from 'src/dto/update-seller.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -158,53 +160,96 @@ export class AuthService {
     return createdSeller.save();
   }
   
-
-  async validateUser(
-    email: string,
-    password: string,
-    userType: 'buyer' | 'seller',
-  ): Promise<any> {
-    // Find the user based on the userType
-    const user =
-      userType === 'buyer'
-        ? await this.buyerModel.findOne({ email })
-        : await this.sellerModel.findOne({ email });
-  
-    // If no user is found with the given email
-    if (!user) {
-      throw new HttpException(
-        'No User found with this email.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  
-    // If the userType does not match
-    if (userType === 'buyer' && !this.buyerModel.exists({ email })) {
-      throw new HttpException(
-        'User with role buyer not found.',
-        HttpStatus.BAD_REQUEST,
-      );
-    } else if (userType === 'seller' && !this.sellerModel.exists({ email })) {
-      throw new HttpException(
-        'User with role "seller" not found.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  
-    // If the password is incorrect
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Password is incorrect.');
-    }
-  
-    // If everything is correct, return the user
-    return user;
+//********** Validate User *****************
+async validateUser(
+  email: string,
+  password: string,
+  userType: 'buyer' | 'seller',
+): Promise<any> {
+  // Check if all fields are provided
+  if (!email || !password || !userType) {
+    throw new HttpException(
+      'Please fill out all input fields properly.',
+      HttpStatus.BAD_REQUEST,
+    );
   }
-  
+
+  // Validate userType
+  if (userType !== 'buyer' && userType !== 'seller') {
+    throw new HttpException(
+      'Please enter the correct role: buyer or seller.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  // Find the user based on the userType
+  const user =
+    userType === 'buyer'
+      ? await this.buyerModel.findOne({ email })
+      : await this.sellerModel.findOne({ email });
+
+  // If no user is found with the given email
+  if (!user) {
+    throw new HttpException(
+      'No user found with this email.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  // If the userType does not match the found user
+  if (userType === 'buyer' && !await this.buyerModel.exists({ email })) {
+    throw new HttpException(
+      'User with role "buyer" not found.',
+      HttpStatus.BAD_REQUEST,
+    );
+  } else if (userType === 'seller' && !await this.sellerModel.exists({ email })) {
+    throw new HttpException(
+      'User with role "seller" not found.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  // If the password is incorrect
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new HttpException(
+      'Password is incorrect.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  // If everything is correct, return the user
+  return user;
+}
+
+  //********** Login  *****************
   async login(user: any) {
     const payload = { username: user.username, userId: user._id,email:user.email,phone:user.phone,address:user.address};
     return {
       token: this.jwtService.sign(payload),
     };
+  }
+
+  //********** UPDATE BUYER *****************
+  async updateBuyer(userId: string, updateBuyerDto: UpdateBuyerDto): Promise<Buyer> {
+    const updatedBuyer = await this.buyerModel.findByIdAndUpdate(userId, updateBuyerDto, { new: true });
+
+    if (!updatedBuyer) {
+      throw new HttpException('Buyer not found', HttpStatus.NOT_FOUND);
+    }
+    return updatedBuyer;
+  }
+
+  //********** UPDATE SELLER *****************
+  async updateSeller(userId: string, updateSellerDto: UpdateSellerDto): Promise<Seller> {
+    console.log("UserId: " + userId);
+    
+    const updatedSeller = await this.sellerModel.findByIdAndUpdate(userId, updateSellerDto, { new: true });
+
+    if (!updatedSeller) {
+      throw new HttpException('Seller not found', HttpStatus.NOT_FOUND);
+    }
+
+    return updatedSeller;
   }
 }
