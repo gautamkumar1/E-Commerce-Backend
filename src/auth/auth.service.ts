@@ -278,19 +278,24 @@ async validateUser(
 
     await this.emailService.sendPasswordResetEmail(email, token);
 
-    return token;
+    return {message:"Password reset email sent",
+      token:token
+    };
   }
 
   //********** RESET PASSWORD *****************
-  async resetPassword(userId: string, newPassword: string) {
-    console.log("userId: ",userId);
+  async resetPassword(email: string, newPassword: string) {
+    
     
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await this.buyerModel.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true })
-      || await this.sellerModel.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true });
+    const updatedUser = await this.buyerModel.findOneAndUpdate( { email: email }, { password: hashedPassword }, { new: true })
+      || await this.sellerModel.findOneAndUpdate( { email: email }, { password: hashedPassword }, { new: true });
 
     if (!updatedUser) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      message: 'Password successfully updated',
     }
   }
 }
