@@ -7,10 +7,10 @@ export type ReviewDocument = Review & Document;
 
 @Schema()
 export class Review {
-  @Prop({ required: true })
+  @Prop()
   productId: string;
 
-  @Prop({ required: true })
+  @Prop()
   userId: string;
 
   @Prop({ required: true })

@@ -11,8 +11,13 @@ export class ReviewService {
   constructor(@InjectModel(Review.name) private reviewModel: Model<ReviewDocument>) {}
 
   // Create a new review
-  async createReview(createReviewDto: CreateReviewDto): Promise<Review> {
-    const createdReview = new this.reviewModel(createReviewDto);
+  async createReview(createReviewDto: CreateReviewDto, productId: string, userId: string): Promise<Review> {
+    const reviewData = {
+      ...createReviewDto,
+      productId,
+      userId
+    };
+    const createdReview = new this.reviewModel(reviewData);
     return createdReview.save();
   }
 

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, UseGuards, Request } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto, UpdateReviewDto } from '../dto/review.dto';
 import { Review } from '../schema/review.schema';
@@ -14,10 +14,15 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   // POST /reviews - Create a new review
-  @UseGuards(JwtAuthGuard,RolesGuard)
-  @Post()
-  async createReview(@Body() createReviewDto: CreateReviewDto): Promise<Review> {
-    return this.reviewService.createReview(createReviewDto);
+   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post(':productId')
+  async createReview(
+    @Param('productId') productId: string, // Extract productId from the URL
+    @Request() req,  // Extract user information from JWT
+    @Body() createReviewDto: CreateReviewDto,
+  ): Promise<Review> {
+    const userId = req.user.userId; // Extract userId from JWT token
+    return this.reviewService.createReview(createReviewDto, productId, userId); // Pass productId and userId to the service
   }
   @UseGuards(JwtAuthGuard,RolesGuard)
   @Get('getAllReviews')
