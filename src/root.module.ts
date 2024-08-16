@@ -4,12 +4,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';  
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ProductModule } from './product/product.module';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule available globally
-      envFilePath: '.env', // Specify the path to your .env file
+      isGlobal: true, 
+      envFilePath: '.env', 
     }),
     // Connect to MongoDB
     MongooseModule.forRootAsync({
@@ -20,6 +22,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }), 
     AuthModule,
+    ProductModule,
+    
   ],
   controllers: [],
   providers: [],
