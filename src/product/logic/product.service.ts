@@ -17,7 +17,7 @@ cloudinary.config({
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-  ) {}
+  ) { }
 
   // ************* CREATE PRODUCT **************** //
   async createProduct(createProductDto: CreateProductDto): Promise<Product> {
@@ -62,14 +62,48 @@ export class ProductService {
   }
 
   // ************* SEARCH AND FILTER PRODUCT **************** //
-  async searchProducts(query: string, category: string): Promise<Product[]> {
-    const filter = {
-      name: { $regex: query, $options: 'i' },
-      ...(category && { category }),
-    };
-    return this.productModel.find(filter).exec();
-  }
+  async searchProducts(query: any): Promise<Product[]> {
+    const searchCriteria: any = {};
 
+    // Search by name or description
+    if (query.search) {
+      searchCriteria.$or = [
+        { name: { $regex: query.search, $options: 'i' } }, // case-insensitive search
+        { description: { $regex: query.search, $options: 'i' } },
+      ];
+    }
+
+    // Filter by category
+    if (query.category) {
+      searchCriteria.category = query.category;
+    }
+
+    // Filter by price range
+    if (query.minPrice || query.maxPrice) {
+      searchCriteria.price = {};
+      if (query.minPrice) {
+        searchCriteria.price.$gte = Number(query.minPrice);
+      }
+      if (query.maxPrice) {
+        searchCriteria.price.$lte = Number(query.maxPrice);
+      }
+    }
+
+    // Filter by availability
+    if (query.available) {
+      searchCriteria.available = query.available === 'true';
+    }
+
+    // Filter by rating
+    if (query.minRating) {
+      searchCriteria.rating = { $gte: Number(query.minRating) };
+    }
+
+    
+    
+    // Return products based on search and filter criteria
+    return this.productModel.find(searchCriteria).exec();
+  }
   // ************* UPLOAD PRODUCT IMAGE **************** //
   async uploadImage(file: Express.Multer.File): Promise<string> {
     const result = await cloudinary.uploader.upload(file.path);
