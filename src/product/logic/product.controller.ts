@@ -27,15 +27,18 @@ export class ProductController {
   getProductById(@Param('id') id: string) {
     return this.productService.getProductById(id);
   }
-
+  @UseGuards(JwtAuthGuard,RolesGuard)
   @Put(':id')
+  @Roles(UserRole.Seller)
   updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     return this.productService.updateProduct(id, updateProductDto);
   }
+  @UseGuards(JwtAuthGuard,RolesGuard)
   @Delete(':id')
+  @Roles(UserRole.Seller)
   deleteProduct(@Param('id') id: string) {
     return this.productService.deleteProduct(id);
   }

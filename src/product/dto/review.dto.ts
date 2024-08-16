@@ -1,23 +1,12 @@
 /* eslint-disable prettier/prettier */
-// src/review/dto/review.dto.ts
-import { IsNotEmpty, IsString, IsNumber, Min, Max } from 'class-validator';
-
 export class CreateReviewDto {
-  @IsNotEmpty()
-  @IsString()
-  productId: string;
+  readonly productId: string;
+  readonly userId: string;
+  readonly rating: number;
+  readonly comment: string;
+}
 
-  @IsNotEmpty()
-  @IsString()
-  userId: string;
-
-  @IsNotEmpty()
-  @IsString()
-  comment: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  @Max(5)
-  rating: number;
+export class UpdateReviewDto {
+  readonly rating?: number;
+  readonly comment?: string;
 }
