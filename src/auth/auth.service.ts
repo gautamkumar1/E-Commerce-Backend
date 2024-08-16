@@ -4,14 +4,17 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { Buyer, BuyerDocument } from 'src/schema/buyer.schema';
-import { Seller, SellerDocument } from 'src/schema/seller.schema';
+import { Buyer, BuyerDocument } from 'src/auth/schema/buyer.schema';
+
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
-import { UpdateSellerDto } from 'src/dto/update-seller.dto';
+
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from './auth-email.service';
 import { UserRole } from './role.enum';
+
+import { UpdateBuyerDto } from './dto/update-buyer.dto';
+import { UpdateSellerDto } from './dto/update-seller.dto';
+import { Seller, SellerDocument } from './schema/seller.schema';
 @Injectable()
 export class AuthService {
   constructor(

@@ -2,11 +2,12 @@
 import { Controller, Post, Body, Request, UseGuards, UnauthorizedException, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { UpdateBuyerDto } from 'src/dto/update-buyer.dto';
-import { UpdateSellerDto } from 'src/dto/update-seller.dto';
+
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/auth/role.enum';
 import { RolesGuard } from 'src/auth/roles.guard';
+import { UpdateBuyerDto } from './dto/update-buyer.dto';
+import { UpdateSellerDto } from './dto/update-seller.dto';
 @Controller('api')
 export class AuthController {
   constructor(private authService: AuthService) {}
