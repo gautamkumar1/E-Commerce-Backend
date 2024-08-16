@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProductModule } from './product/product.module';
 import { ReviewModule } from './product/review.module';
+import { CartModule } from './cart/module/cart.module';
 
 
 @Module({
@@ -24,8 +25,8 @@ import { ReviewModule } from './product/review.module';
     }), 
     AuthModule,
     ProductModule,
-    ReviewModule
-    
+    ReviewModule,
+    CartModule
   ],
   controllers: [],
   providers: [],
