@@ -24,7 +24,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, token: string) {
-    const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+    const resetUrl = `http://localhost:3000/resetpw?token=${token}`;
     console.log("RestUrl: "+resetUrl);
     
     const mailOptions = {
